@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -66,6 +67,7 @@ typedef enum {
     Token_EOF = 0,
     // Reserved tokens for ASCII
     Token_LastChar = 127,
+    Token_Identifier,
     Token_Int,
 } token_type;
 
@@ -80,6 +82,34 @@ typedef struct {
 
 static token Token;
 static char *Stream;
+
+static void syntaxError(char *Fmt, ...) {
+    va_list Args;
+    va_start(Args, Fmt);
+    printf("Syntax error: ");
+    vprintf(Fmt, Args);
+    printf("\n");
+    va_end(Args);
+}
+
+static int CharToDigitLookup[256] = {
+    ['0'] = 0,
+    ['1'] = 1,
+    ['2'] = 2,
+    ['3'] = 3,
+    ['4'] = 4,
+    ['5'] = 5,
+    ['6'] = 6,
+    ['7'] = 7,
+    ['8'] = 8,
+    ['9'] = 9,
+    ['a'] = 10, ['A'] = 10,
+    ['b'] = 11, ['B'] = 11,
+    ['c'] = 12, ['C'] = 12,
+    ['d'] = 13, ['D'] = 13,
+    ['e'] = 14, ['E'] = 14,
+    ['f'] = 15, ['F'] = 15,
+};
 
 static void nextToken() {
     while(*Stream == ' ' || *Stream == '\n' || *Stream == '\t' || *Stream == '\r' || *Stream == '\v') {
@@ -98,6 +128,7 @@ static void nextToken() {
         case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w':
         case 'x': case 'y': case 'z': case '_':
         {
+            Token.Type = Token_Identifier;
             ++Stream;
             while(isalnum(*Stream) || *Stream == '_') {
                 ++Stream;
@@ -107,9 +138,54 @@ static void nextToken() {
         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
         {
             Token.Type = Token_Int;
-            Token.Value = *Stream - '0';
-            while(isdigit(*++Stream)) {
-                Token.Value = 10*Token.Value + *Stream - '0';
+            uint64_t Base = 10;
+            if(*Stream == '0') {
+                switch(*(++Stream)) {
+                    case 'b': case 'B': {
+                        Base = 2;
+                        ++Stream;
+                    } break;
+
+                    case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7':
+                    {
+                        Base = 8;
+                    } break;
+
+                    case 'x': case 'X': {
+                        Base = 16;
+                        ++Stream;
+                    } break;
+
+                    default: {
+                        syntaxError("Wrong integer prefix 0%c. Assuming decimal...", *Stream);
+                        ++Stream;
+                    } break;
+                }
+            }
+
+            Token.Value = 0;
+            for(;;) {
+                uint64_t Digit = CharToDigitLookup[(int)*Stream];
+                if(Digit == 0 && *Stream != '0') {
+                    break;
+                }
+
+                if(Digit >= Base) {
+                    syntaxError("Digit '%c' out of range for base %d", *Stream, Base);
+                    Digit = 0;
+                }
+
+                if(Token.Value > (UINT64_MAX - Digit)/Base) {
+                    syntaxError("Integer literal overflow", *Stream, Base);
+                    while(Digit != 0 || *Stream == '0') {
+                        ++Stream;
+                    }
+                    Token.Value = 0;
+                    break;
+                }
+
+                Token.Value = Base*Token.Value + Digit;
+                ++Stream;
             }
         } break;
 
@@ -140,13 +216,14 @@ static bool matchToken(token_type Type) {
 #define assertInt(Val) assert((Val) == Token.Value && matchToken(Token_Int))
 
 static void lexTest() {
-    initStream("-1+34+123");
+    initStream("-1+0x34+0123");
     assertToken('-');
     assertInt(1);
     assertToken('+');
-    assertInt(34);
+    assertInt(0x34);
     assertToken('+');
-    assertInt(123);
+    assertInt(0123);
+    assertToken(Token_EOF);
 }
 
 #undef assertToken
