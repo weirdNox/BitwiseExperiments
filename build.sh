@@ -1,5 +1,3 @@
 #!/usr/bin/env sh
-cd "$(dirname "$1")"
-filename=$(basename "$1")
-filename=${filename%.*}
-gcc -Wall -Wextra -g3 "$1" -o "$filename.out"
+cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null
+gcc -Wall -Wextra -Wno-unused-function -g3 main.c -o main.out

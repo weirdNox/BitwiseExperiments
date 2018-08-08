@@ -3,8 +3,11 @@
 #+BEGIN_SRC fundamental
 INT = 0 | [1-9][0-9]* | 0[xX][0-9a-fA-F]+ | 0[0-7]+ | 0[bB][0-1]+
 
-factor = [~-]? (INT | '(' expression ')')
-mul_expr = factor (mul_op factor)
-add_expr = mul_expr (add_op mul_expr)
+base_expr  = INT | '(' expression ')'
+unary_expr = [~-+] unary_expr
+           | base_expr
+mul_op     = '*' | '/' | '%' | '<<' | '>>' | '&'
+mul_expr   = unary_expr (mul_op factor)*
+add_expr   = mul_expr   ([+-|^] mul_expr)*
 expression = add_expr
 #+END_SRC
