@@ -6,6 +6,7 @@ typedef enum token_type {
     Token_Int,
     Token_LeftShift,
     Token_RightShift,
+    Token_Pow,
 } token_type;
 
 typedef struct {
@@ -135,6 +136,16 @@ static void nextToken() {
                 ++Stream;
             }
             Token.Type = Token_RightShift;
+        } break;
+
+        case '*': {
+            ++Stream;
+            if(*Stream == '*') {
+                ++Stream;
+                Token.Type = Token_Pow;
+            } else {
+                Token.Type = '*';
+            }
         } break;
 
         default: {

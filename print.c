@@ -29,7 +29,10 @@ static void parsedPrintTest() {
     initStream("-1+2*(3+4)");
     printExpr(parseExpr());
     printf("\n");
-    initStream(" 12*34 + 45/56 + ~25");
+    initStream("12*34 + 45/56 + ~25");
+    printExpr(parseExpr());
+    printf("\n");
+    initStream("12**1235**-2+1+4+2");
     printExpr(parseExpr());
     printf("\n");
 }

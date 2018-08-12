@@ -40,17 +40,26 @@ static expr *parseUnaryExpr() {
     return Result;
 }
 
+static expr *parsePowExpr() {
+    expr *Result = parseUnaryExpr();
+    if(matchToken(Token_Pow)) {
+        Result = exprBinary(Token_Pow, Result, parsePowExpr());
+    }
+
+    return Result;
+}
+
 static bool isMulOp() {
     return (isToken('*') || isToken('/') || isToken('%') || isToken(Token_LeftShift) ||
             isToken(Token_RightShift));
 }
 
 static expr *parseMulExpr() {
-    expr *Result = parseUnaryExpr();
+    expr *Result = parsePowExpr();
     while(isMulOp()) {
         token_type Op = Token.Type;
         nextToken();
-        Result = exprBinary(Op, Result, parseUnaryExpr());
+        Result = exprBinary(Op, Result, parsePowExpr());
     }
 
     return Result;
