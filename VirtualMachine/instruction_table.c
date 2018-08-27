@@ -1,0 +1,15 @@
+typedef enum mnemonic {
+    HALT = 0x00,
+    LIT  = 0x01,
+    ADD  = 0x20,
+    SUB  = 0x21,
+    MUL  = 0x22,
+    DIV  = 0x23,
+    OR   = 0x24,
+    XOR  = 0x25,
+    AND  = 0x26,
+    LSH  = 0x27,
+    RSH  = 0x28,
+    MOD  = 0x29,
+    POW  = 0x2A,
+} mnemonic;
