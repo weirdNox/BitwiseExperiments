@@ -6,29 +6,22 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define InvalidCodePath assert(!"InvalidCodePath")
-#define InvalidDefaultCase default: { InvalidCodePath; } break
+#include <instruction_table.h>
+#include <common.c>
 
-void fatalError(char *Fmt, ...) {
-    va_list Args;
-    va_start(Args, Fmt);
-    fprintf(stderr, "Fatal error: ");
-    vfprintf(stderr, Fmt, Args);
-    fprintf(stderr, "\n");
-    va_end(Args);
-    exit(1);
-}
-
-int32_t executeVm(uint8_t *Code) {
-    enum { StackSize = 1<<10 };
-    int32_t Stack[StackSize];
-    int32_t *Top = Stack;
-
-#include "instruction_table.c"
 #define push(x) *Top++ = (x)
 #define pop() *--Top
 #define pushes(x) assert(Top+(x) - Stack <= StackSize)
 #define pops(x) assert(Top - (x) >= Stack)
+
+#define unaOpCase(M, Op)                        \
+    case M: {                                   \
+        pops(1);                                \
+        int32_t val = pop();                    \
+        pushes(1);                              \
+        push(Op val);                           \
+    } break
+
 #define binOpCase(M, Op)                        \
     case M: {                                   \
         pops(2);                                \
@@ -37,7 +30,8 @@ int32_t executeVm(uint8_t *Code) {
         pushes(1);                              \
         push(lhs Op rhs);                       \
     } break
-#define binFnCase(M, Fun)                      \
+
+#define binFnCase(M, Fun)                       \
     case M: {                                   \
         pops(2);                                \
         int32_t rhs = pop();                    \
@@ -45,6 +39,12 @@ int32_t executeVm(uint8_t *Code) {
         pushes(1);                              \
         push(Fun(lhs, rhs));                    \
     } break
+
+
+static int32_t executeVm(uint8_t *Code) {
+    enum { StackSize = 1<<10 };
+    int32_t Stack[StackSize];
+    int32_t *Top = Stack;
 
     for(;;) {
         mnemonic Op = *Code++;
@@ -73,10 +73,14 @@ int32_t executeVm(uint8_t *Code) {
             binOpCase(OR,   |);
             binOpCase(XOR,  ^);
             binOpCase(AND,  &);
+            unaOpCase(NOT,  ~);
             binOpCase(LSH, <<);
             binOpCase(RSH, >>);
             binOpCase(MOD,  %);
+            unaOpCase(SYM,  -);
             binFnCase(POW, pow);
+
+            case NOP: {} break;
 
             default:
             {
@@ -89,13 +93,15 @@ int32_t executeVm(uint8_t *Code) {
     return 0;
 }
 
-int main() {
-    uint8_t Code[] = {
-        0x01, 0x10, 0x00, 0x00, 0x00,   // 16
-        0x01, 0x05, 0x00, 0x00, 0x00,   // 5
-        0x22,                           // MUL
-        0x00
-    };
+int main(int ArgCount, char *ArgVal[]) {
+    if(ArgCount < 2) {
+        fprintf(stderr, "Usage: %s FILE\n", ArgVal[0]);
+        exit(1);
+    }
+
+    uint8_t *Code = readEntireFile(ArgVal[1]);
+
     printf("Result: %d\n", executeVm(Code));
+
     return 0;
 }
