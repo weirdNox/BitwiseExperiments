@@ -101,11 +101,11 @@ static operator Table[Token_Count] = {
     [Token_BitNot]     = {Operator_Unary,  3, Assoc_Right},
 };
 
-static bool isBinaryOp() {
+static bool isBinaryOp(void) {
     return Table[Token.Type].Kind == Operator_Binary;
 }
 
-static bool isUnaryOp() {
+static bool isUnaryOp(void) {
     if(Token.Type == Token_Add) {
         Token.Type = Token_UnaryPlus;
     }
@@ -117,7 +117,7 @@ static bool isUnaryOp() {
 
 static expression *parse(int);
 
-static expression *parseUnary() {
+static expression *parseUnary(void) {
     expression *Result;
 
     if(isUnaryOp()) {

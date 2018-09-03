@@ -30,7 +30,7 @@ static void *bufGrow(void *Buffer, size_t NewLength, size_t ElementSize) {
     return Header->Buffer;
 }
 
-static void bufferTest() {
+static void bufferTest(void) {
     int *IntBuffer = 0;
     size_t Max = 2500;
     for(size_t I = 0; I < Max; ++I) {

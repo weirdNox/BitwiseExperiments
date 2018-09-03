@@ -25,7 +25,7 @@ static void printExpr(expr *Expr) {
     }
 }
 
-static void parsedPrintTest() {
+static void parsedPrintTest(void) {
     initStream("-1+2*(3+4)");
     printExpr(parseExpr());
     printf("\n");

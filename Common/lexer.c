@@ -83,7 +83,7 @@ static int CharToDigit[256] = {
         }                                       \
     } break
 
-static void nextToken() {
+static void nextToken(void) {
     while(*Stream == ' ' || *Stream == '\n' || *Stream == '\t' || *Stream == '\r' || *Stream == '\v') {
         ++Stream;
     }

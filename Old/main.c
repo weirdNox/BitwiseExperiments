@@ -16,7 +16,7 @@
 #include "parser.c"
 #include "print.c"
 
-int main() {
+int main(void) {
     bufferTest();
     lexTest();
     parsedPrintTest();

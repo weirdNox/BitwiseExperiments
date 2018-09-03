@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS = -g3 -lm -Wextra -Wno-unused-function -ICommon/
+CFLAGS = -g3 -lm -Wall -Wextra -Wstrict-prototypes -Wno-unused-function -ICommon/
 BUILD_DIR ?= build
 
 interpreter = $(BUILD_DIR)/interpreter

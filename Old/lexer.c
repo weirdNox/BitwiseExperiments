@@ -40,7 +40,7 @@ static int CharToDigitLookup[256] = {
     ['f'] = 15, ['F'] = 15,
 };
 
-static void nextToken() {
+static void nextToken(void) {
     while(*Stream == ' ' || *Stream == '\n' || *Stream == '\t' || *Stream == '\r' || *Stream == '\v') {
         ++Stream;
     }
@@ -188,7 +188,7 @@ static bool expectToken(token_type Type) {
 #define assertToken(Val) assert(matchToken(Val))
 #define assertInt(Val) assert((Val) == Token.Value && matchToken(Token_Int))
 
-static void lexTest() {
+static void lexTest(void) {
     initStream("-1+0x34+0123");
     assertToken('-');
     assertInt(1);

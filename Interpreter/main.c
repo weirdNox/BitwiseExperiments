@@ -63,11 +63,11 @@ static operator Table[Token_Count] = {
     [Token_BitNot]     = {Operator_Unary,  3, Assoc_Right},
 };
 
-static bool isBinaryOp() {
+static bool isBinaryOp(void) {
     return Table[Token.Type].Kind == Operator_Binary;
 }
 
-static bool isUnaryOp() {
+static bool isUnaryOp(void) {
     if(Token.Type == Token_Add) {
         Token.Type = Token_UnaryPlus;
     }
@@ -79,7 +79,7 @@ static bool isUnaryOp() {
 
 static int64_t evaluate(int);
 
-static int64_t parseUnary() {
+static int64_t parseUnary(void) {
     int64_t Result = 0;
 
     if(isUnaryOp()) {
@@ -111,8 +111,7 @@ static int64_t parseUnary() {
         nextToken();
     }
     else {
-        parseError("No expected token available.\n");
-        exit(1);
+        fatalError("No expected token available.");
     }
 
     return Result;
@@ -125,8 +124,7 @@ static int64_t evaluate(int Precedence) {
           (Token.Type != Token_EOF && Token.Type != Token_RParen))
     {
         if(!isBinaryOp()) {
-            parseError("Missing expected binary operator.\n");
-            exit(1);
+            fatalError("Missing expected binary operator.");
         }
 
         token_type OpType = Token.Type;

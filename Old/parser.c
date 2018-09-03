@@ -1,6 +1,6 @@
 static expr *parseExpr();
 
-static expr *parseBaseExpr() {
+static expr *parseBaseExpr(void) {
     expr *Result;
     switch((int)Token.Type) {
         case Token_Int: {
@@ -23,11 +23,11 @@ static expr *parseBaseExpr() {
     return Result;
 }
 
-static bool isUnaryOp() {
+static bool isUnaryOp(void) {
     return isToken('~') || isToken('-') || isToken('+');
 }
 
-static expr *parseUnaryExpr() {
+static expr *parseUnaryExpr(void) {
     expr *Result;
     if(isUnaryOp()) {
         token_type Op = Token.Type;
@@ -40,7 +40,7 @@ static expr *parseUnaryExpr() {
     return Result;
 }
 
-static expr *parsePowExpr() {
+static expr *parsePowExpr(void) {
     expr *Result = parseUnaryExpr();
     if(matchToken(Token_Pow)) {
         Result = exprBinary(Token_Pow, Result, parsePowExpr());
@@ -49,12 +49,12 @@ static expr *parsePowExpr() {
     return Result;
 }
 
-static bool isMulOp() {
+static bool isMulOp(void) {
     return (isToken('*') || isToken('/') || isToken('%') || isToken(Token_LeftShift) ||
             isToken(Token_RightShift));
 }
 
-static expr *parseMulExpr() {
+static expr *parseMulExpr(void) {
     expr *Result = parsePowExpr();
     while(isMulOp()) {
         token_type Op = Token.Type;
@@ -65,11 +65,11 @@ static expr *parseMulExpr() {
     return Result;
 }
 
-static bool isAddOp() {
+static bool isAddOp(void) {
     return isToken('+') || isToken('-') || isToken('|') || isToken('^');
 }
 
-static expr *parseAddExpr() {
+static expr *parseAddExpr(void) {
     expr *Result = parseMulExpr();
     while(isAddOp()) {
         token_type Op = Token.Type;
@@ -80,6 +80,6 @@ static expr *parseAddExpr() {
     return Result;
 }
 
-static expr *parseExpr() {
+static expr *parseExpr(void) {
     return parseAddExpr();
 }
